@@ -92,7 +92,7 @@ const Cube: React.FC<CubeProps> = ({ position, size, colorClass, rotate = {x:0,y
               transform: `translate3d(${w/2}px, 0px, ${h/2}px) rotateY(90deg)`,
               width: d, height: h,
               marginTop: -h/2, marginLeft: -d/2, // Center the face on the pivot
-              filter: 'brightness(0.7)'
+              filter: 'brightness(0.9)' // Brighter for face visibility
           }}>
               {faceContent?.right}
           </div>
@@ -111,15 +111,35 @@ const Cube: React.FC<CubeProps> = ({ position, size, colorClass, rotate = {x:0,y
   );
 };
 
-// --- Reusable Red Hat Model ---
+// --- Reusable Red Hat Model (Anime Style) ---
 const RedHat: React.FC = () => (
     <div className="transform-style-3d">
-         {/* Main Dome */}
-         <Cube position={{x: 0, y: 0, z: 0}} size={{x: 22, y: 20, z: 10}} colorClass="bg-red" />
+         {/* Main Cap Dome */}
+         <Cube position={{x: 0, y: 0, z: 0}} size={{x: 24, y: 22, z: 12}} colorClass="bg-red" />
          {/* Top Button */}
-         <Cube position={{x: 0, y: 0, z: 10}} size={{x: 4, y: 4, z: 2}} colorClass="bg-red" />
-         {/* Brim */}
-         <Cube position={{x: 0, y: 10, z: 0}} size={{x: 22, y: 12, z: 2}} colorClass="bg-red" rotate={{x: 10, y: 0, z: 0}} />
+         <Cube position={{x: 0, y: 0, z: 12}} size={{x: 4, y: 4, z: 2}} colorClass="bg-white" />
+         {/* Bill/Brim (Curved look via rotation) */}
+         <Cube position={{x: 0, y: 12, z: 2}} size={{x: 24, y: 14, z: 2}} colorClass="bg-red" rotate={{x: 15, y: 0, z: 0}} />
+         {/* Logo on front */}
+         <div className="absolute bg-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-red-600 text-[10px]"
+              style={{ transform: 'translate3d(0, 11px, 6px) rotateX(-15deg)', left: '-16px' }}>
+            RH
+         </div>
+    </div>
+);
+
+// --- Anime Hair Component ---
+const AnimeHair: React.FC = () => (
+    <div className="transform-style-3d">
+        {/* Base hair */}
+        <Cube position={{x: 0, y: -2, z: 14}} size={{x: 24, y: 20, z: 8}} colorClass="bg-yellow" />
+        {/* Side Bangs */}
+        <Cube position={{x: -12, y: 2, z: 6}} size={{x: 4, y: 8, z: 16}} colorClass="bg-yellow" rotate={{x: 0, y: 0, z: 10}} />
+        <Cube position={{x: 12, y: 2, z: 6}} size={{x: 4, y: 8, z: 16}} colorClass="bg-yellow" rotate={{x: 0, y: 0, z: -10}} />
+        {/* Top Spikes */}
+        <Cube position={{x: 0, y: -8, z: 20}} size={{x: 8, y: 8, z: 12}} colorClass="bg-yellow" rotate={{x: -30, y: 0, z: 0}} />
+        <Cube position={{x: -8, y: -6, z: 18}} size={{x: 8, y: 8, z: 10}} colorClass="bg-yellow" rotate={{x: -20, y: -20, z: 0}} />
+        <Cube position={{x: 8, y: -6, z: 18}} size={{x: 8, y: 8, z: 10}} colorClass="bg-yellow" rotate={{x: -20, y: 20, z: 0}} />
     </div>
 );
 
@@ -165,7 +185,7 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
     }
 
     const shapes: ('box' | 'blob' | 'spiky')[] = ['box', 'blob', 'spiky'];
-    // Dark side colors
+    // Dark side colors - predominantly dark/shadowy
     const colors = ['bg-slate', 'bg-zinc', 'bg-neutral', 'bg-gray'];
 
     const newEnemy: Enemy = {
@@ -177,7 +197,7 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
       color: colors[Math.floor(Math.random() * colors.length)],
       isDead: false,
       type: 'enemy',
-      speed: 2.5 + Math.random() * 1.5, // Slightly faster aggressive enemies
+      speed: 3 + Math.random() * 2, 
       aggroRange: 1200,
       attackCooldown: 0,
       shape: shapes[Math.floor(Math.random() * shapes.length)],
@@ -189,9 +209,8 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
 
   const createExplosion = (x: number, y: number, z: number, colorBase: string) => {
     let tailwindColor = 'bg-white';
-    // Dark explosions for dark enemies
     if (colorBase.includes('slate') || colorBase.includes('gray') || colorBase.includes('zinc')) {
-        tailwindColor = 'bg-red-500'; // Blood/Dark energy effect
+        tailwindColor = 'bg-purple-500'; // Shadow explosion
     }
 
     for (let i = 0; i < 12; i++) {
@@ -295,7 +314,7 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
                 const facingBonus = (player.facingRight && enemyDirX > -20) || (!player.facingRight && enemyDirX < 20);
                 
                 // Slightly larger range for hat swing
-                if (facingBonus && dist < Constants.PUNCH_RANGE + 20) {
+                if (facingBonus && dist < Constants.PUNCH_RANGE + 30) {
                     enemy.isDead = true;
                     createExplosion(enemy.pos.x, enemy.pos.y, enemy.pos.z, enemy.color);
                     scoreRef.current += 100;
@@ -366,48 +385,49 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
   return (
     <div className="w-full h-full bg-slate-900 flex items-center justify-center overflow-hidden relative">
         
-        {/* Hidden Safelist to ensure Tailwind Generates these color classes */}
+        {/* Hidden Safelist for dynamic colors */}
         <div className="hidden">
-            {/* Basic colors */}
             <div className="bg-blue-400 bg-blue-500 bg-blue-600 bg-blue-700 bg-blue-900"></div>
             <div className="bg-red-400 bg-red-500 bg-red-600 bg-red-700 bg-red-900"></div>
             <div className="bg-orange-200 bg-orange-300 bg-orange-400 bg-orange-500 bg-orange-600 bg-orange-700 bg-orange-900"></div>
-            <div className="bg-yellow-400 bg-yellow-500 bg-yellow-600 bg-yellow-700 bg-yellow-900"></div>
-            
-            {/* Dark Side Enemy Colors */}
+            <div className="bg-yellow-300 bg-yellow-400 bg-yellow-500 bg-yellow-600 bg-yellow-700 bg-yellow-900"></div>
             <div className="bg-slate-400 bg-slate-500 bg-slate-600 bg-slate-700 bg-slate-800 bg-slate-900"></div>
             <div className="bg-zinc-400 bg-zinc-500 bg-zinc-600 bg-zinc-700 bg-zinc-900"></div>
-            <div className="bg-neutral-400 bg-neutral-500 bg-neutral-600 bg-neutral-700 bg-neutral-900"></div>
-            <div className="bg-gray-400 bg-gray-500 bg-gray-600 bg-gray-700 bg-gray-900"></div>
+            <div className="bg-purple-500 bg-purple-700 bg-purple-900"></div>
         </div>
 
-        <div className="scene-container w-full h-full relative bg-gradient-to-b from-[#050505] via-[#1a1025] to-[#050505]">
+        <div className="scene-container w-full h-full relative bg-gradient-to-b from-[#0a0a1a] via-[#1a1025] to-[#000000]">
             
             <div 
                 className="world-plane absolute top-1/2 left-1/2 w-0 h-0 transition-transform duration-75 ease-linear transform-style-3d"
                 style={{
                     transformStyle: 'preserve-3d',
-                    transform: `scale(0.8) rotateX(55deg) rotateZ(0deg) translateX(${camX}px) translateY(${camY}px)`
+                    transform: `scale(0.85) rotateX(55deg) rotateZ(0deg) translateX(${camX}px) translateY(${camY}px)`
                 }}
             >
-                {/* Floor Grid */}
+                {/* Floor Grid - Tech Style */}
                 <div 
-                    className="absolute rounded-3xl shadow-[0_0_150px_rgba(220,38,38,0.2)] transform-style-3d"
+                    className="absolute rounded-3xl shadow-[0_0_150px_rgba(50,50,255,0.1)] transform-style-3d"
                     style={{
                         width: Constants.WORLD_WIDTH,
                         height: Constants.WORLD_HEIGHT,
                         transform: `translate(-50%, -50%)`,
-                        background: 'linear-gradient(180deg, #0a0a0a 0%, #171717 100%)',
-                        border: '2px solid #333'
+                        background: 'linear-gradient(180deg, #050510 0%, #101020 100%)',
+                        border: '4px solid #334'
                     }}
                 >
-                    <div className="w-full h-full opacity-10" style={{
-                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px)`,
+                    {/* Grid Pattern */}
+                    <div className="w-full h-full opacity-20" style={{
+                        backgroundImage: `
+                            linear-gradient(rgba(100, 100, 255, 0.3) 1px, transparent 1px), 
+                            linear-gradient(90deg, rgba(100, 100, 255, 0.3) 1px, transparent 1px)
+                        `,
                         backgroundSize: '100px 100px'
                     }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 </div>
 
-                {/* Player Model - HUMAN BOY WITH RED HAT */}
+                {/* Player Model - POP ANIME STYLE */}
                 <div 
                     className="absolute transition-transform duration-75 transform-style-3d"
                     style={{
@@ -416,88 +436,132 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
                         zIndex: 1000
                     }}
                 >
-                    <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-black/50 blur-md rounded-full" />
+                    {/* Shadow Blob */}
+                    <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-black/60 blur-md rounded-full" />
 
                      {playerRef.current.isPunching && (
-                        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full bg-red-500/20 blur-xl" style={{ transform: 'translateZ(10px)'}}></div>
+                        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-red-500/10 blur-xl animate-ping" style={{ transform: 'translateZ(10px)'}}></div>
                     )}
 
                     <div className={`transform-style-3d transition-transform duration-150 ${playerRef.current.invincibleTime > 0 && frameRef.current % 6 < 3 ? 'opacity-40' : 'opacity-100'}`}
                          style={{ transformStyle: 'preserve-3d', transform: `rotateZ(${playerRef.current.facingRight ? 0 : 180}deg) translateZ(${playerRef.current.pos.z}px)` }}
                     >
-                        {/* Legs (Pants - Dark Slate) */}
-                        <Cube position={{x: -5, y: 0, z: 0}} size={{x: 8, y: 10, z: 24}} colorClass="bg-slate" />
-                        <Cube position={{x: 5, y: 0, z: 0}} size={{x: 8, y: 10, z: 24}} colorClass="bg-slate" />
-                        {/* Shoes (Red) */}
-                        <Cube position={{x: -5, y: 1, z: 0}} size={{x: 9, y: 12, z: 6}} colorClass="bg-red" />
-                        <Cube position={{x: 5, y: 1, z: 0}} size={{x: 9, y: 12, z: 6}} colorClass="bg-red" />
-
-                        {/* Torso (Blue Hoodie) */}
-                        <Cube position={{x: 0, y: 0, z: 24}} size={{x: 20, y: 14, z: 20}} colorClass="bg-blue" />
-                        
-                        {/* Head (Skin Tone) */}
-                        <Cube 
-                            position={{x: 0, y: 0, z: 44}} 
-                            size={{x: 18, y: 18, z: 18}} 
-                            colorClass="bg-orange" // orange-200/300 via safelist map
-                            faceContent={{
-                                right: (
-                                    // Face on the side (since rotation handles direction)
-                                    <div className="w-full h-full flex items-center justify-end gap-1 pr-1 pb-2">
-                                        <div className="w-2 h-4 bg-black rounded-full"></div>
-                                        <div className="w-2 h-4 bg-black rounded-full"></div>
-                                    </div>
-                                )
-                            }}
-                        />
-
-                        {/* Hair (Black/Dark Brown) visible under hat */}
-                        <Cube position={{x: -10, y: 0, z: 50}} size={{x: 2, y: 16, z: 8}} colorClass="bg-gray" />
-                        <Cube position={{x: 10, y: 0, z: 50}} size={{x: 2, y: 16, z: 8}} colorClass="bg-gray" />
-                        <Cube position={{x: 0, y: -10, z: 48}} size={{x: 20, y: 2, z: 8}} colorClass="bg-gray" />
-
-                        {/* THE RED HAT */}
-                        {/* If not punching, it's on the head. If punching, it's gone (swung) */}
-                        {!playerRef.current.isPunching && (
-                            <div className="transform-style-3d" style={{ transform: 'translate3d(0, 0, 56px) rotateZ(-10deg)' }}>
-                                <RedHat />
+                        {/* 1. SCARF - Trails behind */}
+                        <div className="transform-style-3d absolute" style={{ transform: 'translate3d(-8px, 0, 42px) rotateY(-10deg)' }}>
+                            <div className={`origin-left transition-transform duration-300 ${playerRef.current.vel.x !== 0 || playerRef.current.vel.y !== 0 ? 'scale-x-100 rotate-y-12' : 'scale-x-75 rotate-y-45'}`}>
+                                <Cube position={{x: -20, y: 0, z: 0}} size={{x: 30, y: 10, z: 2}} colorClass="bg-red" />
+                                <Cube position={{x: -45, y: 0, z: -4}} size={{x: 20, y: 12, z: 2}} colorClass="bg-red" rotate={{x: 0, y: 20, z: 0}} />
                             </div>
-                        )}
-
-                        {/* Arms (Skin + Sleeves) */}
-                        {/* Left Arm (Inactive mostly) */}
-                        <div className="transform-style-3d" style={{ transform: 'translate3d(0, -10, 38px) rotateX(-10deg)' }}>
-                             <Cube position={{x: 0, y: 0, z: -8}} size={{x: 6, y: 6, z: 16}} colorClass="bg-blue" />
-                             <Cube position={{x: 0, y: 0, z: -18}} size={{x: 6, y: 6, z: 6}} colorClass="bg-orange" />
                         </div>
 
-                        {/* Right Arm (Active for attack) */}
-                        <div className="transform-style-3d transition-all duration-100" style={{ 
+                        {/* 2. LEGS - Baggy Pants */}
+                        <Cube position={{x: -6, y: 0, z: 0}} size={{x: 10, y: 12, z: 20}} colorClass="bg-slate" />
+                        <Cube position={{x: 6, y: 0, z: 0}} size={{x: 10, y: 12, z: 20}} colorClass="bg-slate" />
+                        
+                        {/* 3. SHOES - Oversized Sneakers */}
+                        <Cube position={{x: -6, y: 2, z: 0}} size={{x: 12, y: 16, z: 8}} colorClass="bg-red" />
+                        <Cube position={{x: 6, y: 2, z: 0}} size={{x: 12, y: 16, z: 8}} colorClass="bg-red" />
+                        {/* White soles */}
+                        <Cube position={{x: -6, y: 2, z: 0}} size={{x: 12, y: 16, z: 2}} colorClass="bg-white" />
+                        <Cube position={{x: 6, y: 2, z: 0}} size={{x: 12, y: 16, z: 2}} colorClass="bg-white" />
+
+                        {/* 4. TORSO - Hoodie */}
+                        <Cube position={{x: 0, y: 0, z: 20}} size={{x: 24, y: 16, z: 22}} colorClass="bg-slate" />
+                        {/* Hoodie Pocket */}
+                        <Cube position={{x: 0, y: 9, z: 18}} size={{x: 16, y: 2, z: 10}} colorClass="bg-slate" />
+                        {/* Zipper/String details */}
+                        <div className="absolute w-1 h-12 bg-white/50" style={{ transform: 'translate3d(0, 8px, 20px) rotateX(-5deg)' }}></div>
+
+                        {/* 5. ARMS */}
+                        {/* Left Arm */}
+                        <div className="transform-style-3d" style={{ transform: 'translate3d(0, -10, 36px) rotateX(-10deg) rotateZ(10deg)' }}>
+                             <Cube position={{x: 0, y: 0, z: -10}} size={{x: 8, y: 8, z: 18}} colorClass="bg-slate" />
+                             {/* Hand */}
+                             <Cube position={{x: 0, y: 0, z: -20}} size={{x: 8, y: 8, z: 8}} colorClass="bg-orange" />
+                        </div>
+
+                        {/* Right Arm (Action Arm) */}
+                        <div className="transform-style-3d transition-all duration-100 ease-out" style={{ 
                             transformStyle: 'preserve-3d',
                             transform: playerRef.current.isPunching 
-                                ? 'translate3d(0, 10, 38px) rotateX(-80deg)' // Raised for swing
-                                : 'translate3d(0, 10, 38px) rotateX(10deg)' // Idle
+                                ? 'translate3d(0, 10, 36px) rotateX(-90deg) rotateZ(-20deg)' // Full swing
+                                : 'translate3d(0, 10, 36px) rotateX(10deg) rotateZ(-10deg)' // Idle
                         }}>
-                             <Cube position={{x: 0, y: 0, z: -8}} size={{x: 6, y: 6, z: 16}} colorClass="bg-blue" />
-                             <Cube position={{x: 0, y: 0, z: -18}} size={{x: 6, y: 6, z: 6}} colorClass="bg-orange" />
+                             <Cube position={{x: 0, y: 0, z: -10}} size={{x: 8, y: 8, z: 18}} colorClass="bg-slate" />
+                             {/* Hand */}
+                             <Cube position={{x: 0, y: 0, z: -20}} size={{x: 8, y: 8, z: 8}} colorClass="bg-orange" />
                              
                              {/* THE HAT WEAPON */}
                              {playerRef.current.isPunching && (
-                                 <div className="transform-style-3d animate-spin" style={{ 
-                                     transform: `translate3d(0, 0, -30px) scale(1.5) rotateY(${frameRef.current * 30}deg)`,
-                                     transformOrigin: 'center'
+                                 <div className="transform-style-3d" style={{ 
+                                     transform: `translate3d(0, 0, -35px) scale(1.6) rotateY(${frameRef.current * 60}deg)`, // Faster spin
                                  }}>
-                                     <RedHat />
-                                     {/* Swing Trail */}
-                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-2 bg-white/50 blur-md transform rotate-90"></div>
+                                     {/* Power Aura */}
+                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-red-600/40 blur-xl rounded-full animate-pulse"></div>
+                                     
+                                     {/* The Hat with Glow */}
+                                     <div className="filter drop-shadow-[0_0_15px_rgba(255,50,50,0.8)] brightness-110">
+                                        <RedHat />
+                                     </div>
+
+                                     {/* Swoosh / Speed Trail */}
+                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180%] h-4 bg-gradient-to-r from-transparent via-white to-transparent blur-sm rotate-45 mix-blend-overlay"></div>
+                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180%] h-4 bg-gradient-to-r from-transparent via-white to-transparent blur-sm -rotate-45 mix-blend-overlay"></div>
+
+                                     {/* Shockwave Rings */}
+                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 border-[6px] border-white/40 rounded-full animate-ping"></div>
+                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 border-2 border-red-400 rounded-full animate-ping [animation-delay:0.1s]"></div>
                                  </div>
                              )}
+                        </div>
+
+                        {/* 6. HEAD GROUP */}
+                        <div className="transform-style-3d" style={{ transform: 'translate3d(0, 0, 44px)' }}>
+                             {/* Face/Head */}
+                             <Cube 
+                                position={{x: 0, y: 0, z: 0}} 
+                                size={{x: 22, y: 22, z: 22}} 
+                                colorClass="bg-orange" 
+                                faceContent={{
+                                    right: (
+                                        // ANIME FACE (Side view)
+                                        <div className="w-full h-full flex flex-col items-end justify-center pr-2 pt-2 relative">
+                                            {/* Big Anime Eyes */}
+                                            <div className="flex gap-2 mb-1">
+                                                <div className="w-5 h-7 bg-white rounded-full overflow-hidden border border-black/10 relative">
+                                                    <div className="absolute right-0 bottom-0 w-4 h-5 bg-sky-500 rounded-full"></div>
+                                                    <div className="absolute top-1 left-1 w-2 h-2 bg-white rounded-full z-10"></div>
+                                                </div>
+                                                <div className="w-5 h-7 bg-white rounded-full overflow-hidden border border-black/10 relative">
+                                                    <div className="absolute right-0 bottom-0 w-4 h-5 bg-sky-500 rounded-full"></div>
+                                                    <div className="absolute top-1 left-1 w-2 h-2 bg-white rounded-full z-10"></div>
+                                                </div>
+                                            </div>
+                                            {/* Blush */}
+                                            <div className="flex gap-4 pr-1 opacity-50">
+                                                 <div className="w-3 h-1 bg-red-400 rounded-full"></div>
+                                                 <div className="w-3 h-1 bg-red-400 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    )
+                                }}
+                            />
+
+                            {/* Anime Hair */}
+                            <AnimeHair />
+
+                            {/* Hat on Head (when not attacking) */}
+                            {!playerRef.current.isPunching && (
+                                <div className="transform-style-3d" style={{ transform: 'translate3d(0, 0, 14px) rotateX(-5deg)' }}>
+                                    <RedHat />
+                                </div>
+                            )}
                         </div>
 
                     </div>
                 </div>
 
-                {/* Enemies - DARK SIDE STYLE */}
+                {/* Enemies - SHADOW BEASTS */}
                 {enemiesRef.current.map(enemy => (
                     <div
                         key={enemy.id}
@@ -507,50 +571,48 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
                             transform: `translate3d(${enemy.pos.x}px, ${enemy.pos.y}px, 0)`,
                         }}
                     >
-                        {/* Dark Aura Shadow */}
-                        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-red-900/30 blur-lg rounded-full animate-pulse" />
+                        {/* Shadow Aura */}
+                        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-purple-900/40 blur-xl rounded-full animate-pulse" />
                         
-                        <div className="transform-style-3d animate-bounce" style={{ transformStyle: 'preserve-3d', animationDuration: `${2000/enemy.speed}ms` }}>
-                            {/* Main Body - Dark Cube */}
+                        <div className="transform-style-3d animate-bounce" style={{ transformStyle: 'preserve-3d', animationDuration: `${1500/enemy.speed}ms` }}>
+                            {/* Main Body - Dark Matter */}
                             <Cube 
                                 position={{x: 0, y: 0, z: 0}}
-                                size={{x: 36, y: 36, z: 36}}
-                                colorClass={enemy.color}
+                                size={{x: 32, y: 32, z: 32}}
+                                colorClass={enemy.color} // slates/zincs
                                 faceContent={{
                                     front: (
-                                        // Glowing Red Evil Face
-                                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-black/20">
-                                            {/* Glowing Visor or Eyes */}
-                                            <div className="flex gap-4">
-                                                <div className="w-6 h-2 bg-red-500 shadow-[0_0_10px_#ef4444] rounded-sm animate-pulse"></div>
-                                                <div className="w-6 h-2 bg-red-500 shadow-[0_0_10px_#ef4444] rounded-sm animate-pulse"></div>
+                                        // Evil Visor Face
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-black/40">
+                                            {/* Glowing Mono-Eye or Visor */}
+                                            <div className="w-20 h-4 bg-red-500 shadow-[0_0_15px_#ef4444] animate-pulse relative">
+                                                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-yellow-500 to-transparent opacity-50 animate-[ping_1s_infinite]"></div>
                                             </div>
-                                            {/* Jagged Mouth */}
-                                            <div className="w-16 h-1 bg-red-900/50 mt-2"></div>
                                         </div>
                                     )
                                 }}
                             />
                             
-                            {/* Horns / Spikes */}
-                            <Cube position={{x: -12, y: 0, z: 34}} size={{x: 8, y: 8, z: 12}} colorClass={enemy.color} />
-                            <Cube position={{x: 12, y: 0, z: 34}} size={{x: 8, y: 8, z: 12}} colorClass={enemy.color} />
+                            {/* Spikes / Horns */}
+                            <Cube position={{x: -12, y: 0, z: 28}} size={{x: 6, y: 6, z: 16}} colorClass="bg-black" rotate={{x: 10, y: 0, z: -20}} />
+                            <Cube position={{x: 12, y: 0, z: 28}} size={{x: 6, y: 6, z: 16}} colorClass="bg-black" rotate={{x: 10, y: 0, z: 20}} />
 
+                            {/* Floating Name */}
                             <div 
-                                className="absolute -top-24 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/80 text-red-500 text-[10px] px-2 py-0.5 rounded-sm backdrop-blur-sm border border-red-900/50 tracking-widest uppercase font-bold"
+                                className="absolute -top-32 left-1/2 -translate-x-1/2 whitespace-nowrap text-red-500 font-black text-xs tracking-widest uppercase drop-shadow-[0_0_5px_rgba(0,0,0,1)]"
                                 style={{ transform: 'rotateX(-55deg)' }}
                             >
-                                {enemy.flavorText || "SHADOW"}
+                                {enemy.flavorText}
                             </div>
                         </div>
                     </div>
                 ))}
 
-                {/* Particles - darker theme usually, handled in explosion logic */}
+                {/* Particles */}
                 {particlesRef.current.map(p => (
                     <div
                         key={p.id}
-                        className={`absolute rounded-full ${p.color}`}
+                        className={`absolute rounded-sm transform rotate-45 ${p.color}`}
                         style={{
                             width: p.size,
                             height: p.size,
@@ -563,20 +625,21 @@ const World: React.FC<WorldProps> = ({ status, onGameOver, onScoreUpdate, inputS
 
             </div>
             
+            {/* HUD */}
             <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start pointer-events-none">
-                 <div className="flex gap-2">
+                 <div className="flex gap-1 bg-black/30 p-2 rounded-full backdrop-blur-sm border border-white/10">
                      {[...Array(playerRef.current.maxHp)].map((_, i) => (
-                         <div key={i} className={`w-10 h-10 transition-all duration-300 ${i < playerRef.current.hp ? 'scale-100 opacity-100' : 'scale-75 opacity-30 grayscale'}`}>
+                         <div key={i} className={`text-2xl transition-all duration-300 ${i < playerRef.current.hp ? 'scale-100 opacity-100 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)]' : 'scale-75 opacity-20 grayscale'}`}>
                              ❤️
                          </div>
                      ))}
                  </div>
                  
                  <div className="flex flex-col items-end">
-                     <div className="text-4xl font-black text-white drop-shadow-lg italic tracking-wider">
-                         {scoreRef.current.toString().padStart(6, '0')}
+                     <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 drop-shadow-xl italic tracking-tighter" style={{ fontFamily: 'Impact, sans-serif' }}>
+                         {scoreRef.current}
                      </div>
-                     <div className="text-red-500 font-bold text-sm tracking-widest uppercase">Score</div>
+                     <div className="text-yellow-400 font-bold text-xs tracking-[0.3em] uppercase drop-shadow-md">Score</div>
                  </div>
             </div>
 

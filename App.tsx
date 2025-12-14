@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import World from './components/World';
 import Controls from './components/Controls';
+import MusicPlayer from './components/MusicPlayer';
 import { GameStatus } from './types';
 
 const App: React.FC = () => {
@@ -31,6 +32,9 @@ const App: React.FC = () => {
   return (
     <div className="w-screen h-screen bg-[#111] text-white relative overflow-hidden font-sans select-none">
       
+      {/* Background Music - Plays only during GAMEPLAY */}
+      <MusicPlayer isPlaying={gameStatus === GameStatus.PLAYING} />
+
       {/* Game Layer */}
       {(gameStatus === GameStatus.PLAYING || gameStatus === GameStatus.GAME_OVER) && (
         <World 
